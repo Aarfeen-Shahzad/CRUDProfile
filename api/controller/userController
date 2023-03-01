@@ -1,0 +1,77 @@
+const userModel = require("./../model/userModel");
+const jwt = require("jsonwebtoken");
+const sec = "Aarfeen";
+
+exports.signup = async (req, res) => {
+  let { username, email, password } = req.body;
+  console.log(username);
+
+  console.log(req.img);
+  const signup = new userModel({
+    username,
+    email,
+    password,
+    image: req.img,
+  });
+  console.log(signup);
+  const result = await signup.save();
+  res.status(200).json(result);
+};
+
+exports.login = async (req, res) => {
+  let { email, password } = req.body;
+
+  const login = await userModel.findOne({ email });
+  console.log(login);
+  if (login === null) {
+    res.status(401).json({
+      message: "user Not Exist",
+    });
+  } else if (login.password === password && login.email === email) {
+    jwt.sign({ id: login.id }, sec, (err, token) => {
+      if (token) {
+        res.status(200).json({
+          message: "login Successfully",
+          token,
+        });
+      }
+    });
+  } else {
+    res.status(401).json({
+      message: "Email and password not matched",
+    });
+  }
+};
+
+exports.profileU = async (req, res) => {
+  console.log(req.id);
+  console.log(req.img);
+  let result = { ...req.body, image: req.img };
+  console.log(result, "data");
+  const data = await userModel.findByIdAndUpdate(req.id, result, {
+    new: true,
+  });
+  res.status(200).json({ data });
+};
+
+exports.header = async (req, res) => {
+  console.log(req.id);
+  let data = await userModel.findById(req.id);
+  console.log(data);
+  res.status(200).json({
+    username: data.username,
+    image: data.image,
+  });
+};
+
+exports.profileG = async (req, res) => {
+  console.log(req.id);
+  let data = await userModel.findById(req.id);
+  console.log(data);
+  res.status(200).json({
+    username: data.username,
+    email: data.email,
+    image: data.image,
+    password: data.password,
+  });
+};

@@ -1,0 +1,19 @@
+const express = require("express");
+const userController = require("./../controller/userController");
+const userMid = require("./../middleware/userMiddleware");
+
+const router = express.Router();
+
+router.post("/signup", userMid.data.single("file"), userController.signup);
+router.post("/login", userController.login);
+router.patch(
+  "/setting",
+  userMid.auth,
+  userMid.data.single("file"),
+  userController.profileU
+);
+router.get("/home", userMid.auth, userController.header);
+
+router.get("/profile", userMid.auth, userController.profileG);
+
+module.exports = router;
